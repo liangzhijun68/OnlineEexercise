@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30天API开发训练营</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #2a2a3e;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #6c5ce7, #00cec9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #8888aa;
+            margin-top: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #2a2a3e;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        /* 模式切换 */
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-toggle button {
+            padding: 12px 40px;
+            border: 2px solid #2a2a3e;
+            border-radius: 30px;
+            background: transparent;
+            color: #8888aa;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .mode-toggle button:hover {
+            border-color: #6c5ce7;
+            color: #e0e0e0;
+        }
+
+        .mode-toggle button.active-learn {
+            border-color: #00cec9;
+            background: #00cec9;
+            color: #0f0f1a;
+            box-shadow: 0 0 30px rgba(0, 206, 201, 0.3);
+        }
+
+        .mode-toggle button.active-test {
+            border-color: #6c5ce7;
+            background: #6c5ce7;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(108, 92, 231, 0.3);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px 25px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #8888aa;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #2a2a3e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6c5ce7, #00cec9);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* 主卡片 */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .day-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 35px 40px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .day-number {
+            display: inline-block;
+            background: #2a2a3e;
+            padding: 4px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #6c5ce7;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .day-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .day-card .description {
+            color: #8888aa;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        /* 标签 */
+        .tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .tags span {
+            background: #2a2a3e;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* 问题 */
+        .question-item {
+            background: #0f0f1a;
+            border-radius: 15px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            border-left: 3px solid #6c5ce7;
+        }
+
+        .question-item .q-label {
+            font-size: 0.8rem;
+            color: #6c5ce7;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-item .q-text {
+            margin-top: 8px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .question-item .q-hint {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .question-item .q-learn {
+            background: #0a1a2a;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            color: #6c5ce7;
+            font-size: 0.95rem;
+            display: none;
+            border: 1px solid #1a2a4a;
+        }
+
+        .question-item .q-learn.show {
+            display: block;
+        }
+
+        /* 输入 */
+        .input-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-area input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 2px solid #2a2a3e;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .input-area input.correct {
+            border-color: #00cec9;
+            background: #0a1a1a;
+        }
+
+        .input-area input.wrong {
+            border-color: #fd79a8;
+            background: #1a0a0a;
+        }
+
+        .input-area button {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            background: #6c5ce7;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .input-area button:hover {
+            background: #5a4bd1;
+            transform: translateY(-2px);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 反馈 */
+        .feedback {
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-top: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #0a2a1a;
+            border: 1px solid #00cec9;
+            color: #00cec9;
+        }
+
+        .feedback.error {
+            background: #2a0a0a;
+            border: 1px solid #fd79a8;
+            color: #fd79a8;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 得分 */
+        .score-display {
+            text-align: center;
+            padding: 15px;
+            background: #0f0f1a;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .score-display .score-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6c5ce7, #00cec9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 导航 */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #2a2a3e;
+        }
+
+        .navigation button {
+            padding: 12px 30px;
+            border-radius: 12px;
+            border: 2px solid #2a2a3e;
+            background: transparent;
+            color: #8888aa;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .navigation button:hover:not(:disabled) {
+            border-color: #6c5ce7;
+            color: #e0e0e0;
+            background: #1a1a2e;
+        }
+
+        .navigation button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .navigation .day-indicator {
+            color: #8888aa;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .day-card {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .input-area {
+                flex-direction: column;
+            }
+            .input-area input {
+                min-width: auto;
+            }
+            .navigation {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            .mode-toggle button {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 头部 ===== -->
+    <header class="header">
+        <h1>🚀 30天API开发训练营</h1>
+        <p>从零开始掌握 RESTful API + SQLite + 认证</p>
+        <span class="badge">📅 Day <span id="currentDayDisplay">1</span> / 30</span>
+    </header>
+
+    <!-- ===== 模式切换 ===== -->
+    <div class="mode-toggle">
+        <button id="modeLearn" class="active-learn" onclick="setMode('learn')">📖 学习模式</button>
+        <button id="modeTest" onclick="setMode('test')">🎯 测试模式</button>
+    </div>
+
+    <!-- ===== 进度条 ===== -->
+    <div class="progress-container">
+        <div class="progress-header">
+            <span>📊 学习进度</span>
+            <span id="progressText">0 / 30</span>
+        </div>
+        <div class="progress-bar">
+            <div class="fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- ===== 主内容 ===== -->
+    <div class="container">
+        <div class="day-card" id="dayCard">
+            <div class="day-number" id="dayNumber">DAY 01</div>
+            <h2 id="dayTitle">加载中...</h2>
+            <p class="description" id="dayDescription">请等待数据加载...</p>
+            <div class="tags" id="tagsContainer"></div>
+            <div id="questionsContainer"></div>
+
+            <div class="score-display">
+                <span>⭐ 本日得分：</span>
+                <span class="score-number" id="dayScore">0</span>
+                <span> / <span id="totalQuestions">0</span></span>
+            </div>
+
+            <div class="navigation">
+                <button id="prevBtn" onclick="prevDay()">⬅ 前一天</button>
+                <span class="day-indicator" id="dayIndicator">第 1 / 30 天</span>
+                <button id="nextBtn" onclick="nextDay()">后一天 ➡</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 数据：30 天题目
+        // ============================================================
+        const DAYS = [{
+            id: 1,
+            title: "HTTP 基础",
+            description: "学习 HTTP 协议的核心概念，理解请求与响应的结构",
+            tags: ["🌐 HTTP", "基础"],
+            questions: [
+                { id: "q1", question: "HTTP 的全称是什么？", answer: "HyperText Transfer Protocol",
+                hints: "超文本传输协议" },
+                { id: "q2", question: "HTTP 请求方法 GET 的作用是什么？", answer: "获取资源", hints: "从服务器获取数据" },
+                { id: "q3", question: "HTTP 状态码 200 表示什么？", answer: "成功", hints: "请求处理成功" }
+            ]
+        }, {
+            id: 2,
+            title: "Express 入门",
+            description: "学习使用 Express 框架创建第一个 API 服务",
+            tags: ["⚡ Express", "框架"],
+            questions: [
+                { id: "q1", question: "安装 Express 的 npm 命令是什么？", answer: "npm install express",
+                    hints: "npm i express" },
+                { id: "q2", question: "Express 中定义 GET 路由的方法是什么？", answer: "app.get()", hints: "app.方法名()" },
+                { id: "q3", question: "Express 中返回 JSON 数据的方法是什么？", answer: "res.json()", hints: "res.方法名()" }
+            ]
+        }, {
+            id: 3,
+            title: "SQLite 基础",
+            description: "学习 SQLite 数据库的基本操作",
+            tags: ["🗄️ SQLite", "数据库"],
+            questions: [
+                { id: "q1", question: "创建 users 表的 SQL 语句以什么开头？", answer: "CREATE TABLE users",
+                    hints: "CREATE TABLE 表名" },
+                { id: "q2", question: "插入数据的 SQL 语句以什么开头？", answer: "INSERT INTO", hints: "INSERT 表名" },
+                { id: "q3", question: "查询所有数据的 SQL 语句是什么？", answer: "SELECT * FROM", hints: "SELECT * FROM 表名" }
+            ]
+        }, {
+            id: 4,
+            title: "CRUD 操作",
+            description: "实现完整的增删改查功能",
+            tags: ["📝 CRUD", "操作"],
+            questions: [
+                { id: "q1", question: "创建资源用哪个 HTTP 方法？", answer: "POST", hints: "C = Create" },
+                { id: "q2", question: "更新资源用哪个 HTTP 方法？", answer: "PUT", hints: "U = Update" },
+                { id: "q3", question: "删除资源用哪个 HTTP 方法？", answer: "DELETE", hints: "D = Delete" }
+            ]
+        }, {
+            id: 5,
+            title: "参数传递",
+            description: "学习 URL 参数、查询参数和请求体的使用",
+            tags: ["📦 参数", "传递"],
+            questions: [
+                { id: "q1", question: "/users/:id 中的 :id 是什么？", answer: "动态路由参数", hints: "URL 中的变量" },
+                { id: "q2", question: "获取 ?name=Alice 的 Express 方法？", answer: "req.query", hints: "req.属性名" },
+                { id: "q3", question: "解析 JSON 请求体的中间件？", answer: "express.json()", hints: "app.use(...)" }
+            ]
+        }, {
+            id: 6,
+            title: "密码加密",
+            description: "使用 bcrypt 实现密码加密存储",
+            tags: ["🔐 加密", "安全"],
+            questions: [
+                { id: "q1", question: "安装 bcrypt 的 npm 命令？", answer: "npm install bcrypt", hints: "npm i bcrypt" },
+                { id: "q2", question: "bcrypt 加密密码的方法？", answer: "bcrypt.hash()", hints: "bcrypt.方法名()" },
+                { id: "q3", question: "bcrypt 验证密码的方法？", answer: "bcrypt.compare()", hints: "bcrypt.方法名()" }
+            ]
+        }, {
+            id: 7,
+            title: "用户注册",
+            description: "实现完整的用户注册功能",
+            tags: ["📝 注册", "用户"],
+            questions: [
+                { id: "q1", question: "注册用户使用什么 HTTP 方法？", answer: "POST", hints: "创建新资源" },
+                { id: "q2", question: "验证用户名是否存在用什么 SQL？", answer: "SELECT", hints: "查询数据" },
+                { id: "q3", question: "注册成功返回什么状态码？", answer: "201", hints: "Created" }
+            ]
+        }, {
+            id: 8,
+            title: "用户登录",
+            description: "实现用户登录和密码验证",
+            tags: ["🔑 登录", "认证"],
+            questions: [
+                { id: "q1", question: "登录验证的核心步骤？", answer: "查询用户并比对密码", hints: "先查后比" },
+                { id: "q2", question: "用户不存在时返回什么状态码？", answer: "401", hints: "Unauthorized" },
+                { id: "q3", question: "密码错误时返回什么状态码？", answer: "401", hints: "Unauthorized" }
+            ]
+        }, {
+            id: 9,
+            title: "JWT 认证",
+            description: "使用 JWT 实现无状态认证",
+            tags: ["🎫 JWT", "认证"],
+            questions: [
+                { id: "q1", question: "安装 jsonwebtoken 的 npm 命令？", answer: "npm install jsonwebtoken",
+                    hints: "npm i jsonwebtoken" },
+                { id: "q2", question: "生成 JWT 的方法？", answer: "jwt.sign()", hints: "jwt.方法名()" },
+                { id: "q3", question: "验证 JWT 的方法？", answer: "jwt.verify()", hints: "jwt.方法名()" }
+            ]
+        }, {
+            id: 10,
+            title: "中间件",
+            description: "学习 Express 中间件的概念和用法",
+            tags: ["🔌 中间件", "Express"],
+            questions: [
+                { id: "q1", question: "中间件的三个核心参数？", answer: "req, res, next", hints: "三个参数" },
+                { id: "q2", question: "调用下一个中间件的函数？", answer: "next()", hints: "函数名()" },
+                { id: "q3", question: "全局注册中间件的方法？", answer: "app.use()", hints: "app.方法名()" }
+            ]
+        }, {
+            id: 11,
+            title: "文件上传",
+            description: "学习 multer 实现文件上传",
+            tags: ["📤 上传", "文件"],
+            questions: [
+                { id: "q1", question: "安装 multer 的 npm 命令？", answer: "npm install multer", hints: "npm i multer" },
+                { id: "q2", question: "multer 配置存储引擎的方法？", answer: "multer.diskStorage()",
+                    hints: "multer.方法名()" },
+                { id: "q3", question: "处理单文件上传的中间件？", answer: "multer().single()", hints: "multer().方法名()" }
+            ]
+        }, {
+            id: 12,
+            title: "日志记录",
+            description: "使用 morgan 实现请求日志",
+            tags: ["📋 日志", "调试"],
+            questions: [
+                { id: "q1", question: "安装 morgan 的 npm 命令？", answer: "npm install morgan", hints: "npm i morgan" },
+                { id: "q2", question: "注册 morgan 中间件的方法？", answer: "app.use(morgan())", hints: "app.use(...)" },
+                { id: "q3", question: "morgan 的 'dev' 格式输出什么？", answer: "简洁彩色日志", hints: "开发环境" }
+            ]
+        }, {
+            id: 13,
+            title: "环境变量",
+            description: "使用 dotenv 管理环境配置",
+            tags: ["🔧 环境", "配置"],
+            questions: [
+                { id: "q1", question: "安装 dotenv 的 npm 命令？", answer: "npm install dotenv", hints: "npm i dotenv" },
+                { id: "q2", question: "加载 .env 文件的代码？", answer: "require('dotenv').config()",
+                    hints: "require(...).方法名()" },
+                { id: "q3", question: "访问环境变量的方式？", answer: "process.env.VAR_NAME", hints: "process.env.变量名" }
+            ]
+        }, {
+            id: 14,
+            title: "错误处理",
+            description: "实现全局错误处理中间件",
+            tags: ["❌ 错误", "处理"],
+            questions: [
+                { id: "q1", question: "错误处理中间件有几个参数？", answer: "4", hints: "比普通多一个" },
+                { id: "q2", question: "错误处理中间件的位置？", answer: "所有路由之后", hints: "最后注册" },
+                { id: "q3", question: "捕获异步错误的方式？", answer: "try...catch", hints: "异常捕获" }
+            ]
+        }, {
+            id: 15,
+            title: "数据校验",
+            description: "使用 Joi 或 validator 校验数据",
+            tags: ["✅ 校验", "验证"],
+            questions: [
+                { id: "q1", question: "安装 validator 的 npm 命令？", answer: "npm install validator",
+                    hints: "npm i validator" },
+                { id: "q2", question: "validator 校验邮箱的方法？", answer: "validator.isEmail()",
+                    hints: "validator.方法名()" },
+                { id: "q3", question: "validator 校验是否为空的方法？", answer: "validator.isEmpty()",
+                    hints: "validator.方法名()" }
+            ]
+        }, {
+            id: 16,
+            title: "分页查询",
+            description: "实现列表数据的分页功能",
+            tags: ["📄 分页", "查询"],
+            questions: [
+                { id: "q1", question: "分页需要哪两个参数？", answer: "page和limit", hints: "页码和每页条数" },
+                { id: "q2", question: "SQL 分页的关键字？", answer: "LIMIT和OFFSET", hints: "限制和跳过" },
+                { id: "q3", question: "计算总页数的公式？", answer: "Math.ceil(total / limit)", hints: "向上取整" }
+            ]
+        }, {
+            id: 17,
+            title: "排序与过滤",
+            description: "实现数据的排序和过滤功能",
+            tags: ["🔍 排序", "过滤"],
+            questions: [
+                { id: "q1", question: "SQL 排序的关键字？", answer: "ORDER BY", hints: "排序" },
+                { id: "q2", question: "SQL 模糊查询的关键字？", answer: "LIKE", hints: "模糊匹配" },
+                { id: "q3", question: "多条件查询的逻辑操作符？", answer: "AND", hints: "与" }
+            ]
+        }, {
+            id: 18,
+            title: "关联查询",
+            description: "学习 SQL 表关联查询 (JOIN)",
+            tags: ["🔗 JOIN", "关联"],
+            questions: [
+                { id: "q1", question: "INNER JOIN 返回什么？", answer: "匹配的数据", hints: "交集" },
+                { id: "q2", question: "LEFT JOIN 返回什么？", answer: "左表全部数据", hints: "左表全部" },
+                { id: "q3", question: "外键的 SQL 关键字？", answer: "FOREIGN KEY", hints: "外键" }
+            ]
+        }, {
+            id: 19,
+            title: "事务处理",
+            description: "学习 SQL 事务的使用",
+            tags: ["🔄 事务", "ACID"],
+            questions: [
+                { id: "q1", question: "开始事务的 SQL 命令？", answer: "BEGIN TRANSACTION", hints: "BEGIN" },
+                { id: "q2", question: "提交事务的 SQL 命令？", answer: "COMMIT", hints: "提交" },
+                { id: "q3", question: "回滚事务的 SQL 命令？", answer: "ROLLBACK", hints: "撤销" }
+            ]
+        }, {
+            id: 20,
+            title: "索引优化",
+            description: "学习索引的使用和优化",
+            tags: ["📊 索引", "优化"],
+            questions: [
+                { id: "q1", question: "创建索引的 SQL 命令？", answer: "CREATE INDEX", hints: "创建索引" },
+                { id: "q2", question: "索引的作用？", answer: "提高查询速度", hints: "加速" },
+                { id: "q3", question: "删除索引的 SQL 命令？", answer: "DROP INDEX", hints: "删除索引" }
+            ]
+        }, {
+            id: 21,
+            title: "SQL 注入防御",
+            description: "学习防止 SQL 注入的方法",
+            tags: ["🛡️ 注入", "安全"],
+            questions: [
+                { id: "q1", question: "防止 SQL 注入的核心方法？", answer: "参数化查询", hints: "使用 ? 占位符" },
+                { id: "q2", question: "SQL 注入的危害？", answer: "数据泄露", hints: "安全风险" },
+                { id: "q3", question: "Node.js 中防注入的最佳实践？", answer: "使用占位符", hints: "db.run('?', [值])" }
+            ]
+        }, {
+            id: 22,
+            title: "RESTful 设计",
+            description: "学习 RESTful API 设计规范",
+            tags: ["🌐 RESTful", "设计"],
+            questions: [
+                { id: "q1", question: "REST 中的 R 代表什么？", answer: "Representational", hints: "表现层" },
+                { id: "q2", question: "RESTful API 使用什么传输格式？", answer: "JSON", hints: "常用格式" },
+                { id: "q3", question: "资源通过什么标识？", answer: "URL", hints: "统一资源定位符" }
+            ]
+        }, {
+            id: 23,
+            title: "API 版本管理",
+            description: "学习 API 版本控制策略",
+            tags: ["📌 版本", "管理"],
+            questions: [
+                { id: "q1", question: "URL 版本控制示例？", answer: "/api/v1/users", hints: "版本号" },
+                { id: "q2", question: "请求头版本控制示例？", answer: "Accept-Version", hints: "Header" },
+                { id: "q3", question: "为什么要 API 版本管理？", answer: "向后兼容", hints: "兼容旧客户端" }
+            ]
+        }, {
+            id: 24,
+            title: "速率限制",
+            description: "学习 API 限流和防刷",
+            tags: ["⏱️ 限流", "安全"],
+            questions: [
+                { id: "q1", question: "限流中间件 express-rate-limit 安装命令？", answer: "npm install express-rate-limit",
+                    hints: "npm i express-rate-limit" },
+                { id: "q2", question: "限流的作用？", answer: "防止滥用", hints: "保护服务" },
+                { id: "q3", question: "常见的限流状态码？", answer: "429", hints: "Too Many Requests" }
+            ]
+        }, {
+            id: 25,
+            title: "CORS 跨域",
+            description: "学习跨域资源共享配置",
+            tags: ["🌍 CORS", "跨域"],
+            questions: [
+                { id: "q1", question: "安装 CORS 中间件的 npm 命令？", answer: "npm install cors", hints: "npm i cors" },
+                { id: "q2", question: "启用 CORS 的方法？", answer: "app.use(cors())", hints: "app.use(...)" },
+                { id: "q3", question: "CORS 解决什么问题？", answer: "跨域请求", hints: "浏览器同源策略" }
+            ]
+        }, {
+            id: 26,
+            title: "缓存策略",
+            description: "学习 HTTP 缓存和响应头",
+            tags: ["💾 缓存", "性能"],
+            questions: [
+                { id: "q1", question: "缓存控制头是什么？", answer: "Cache-Control", hints: "响应头" },
+                { id: "q2", question: "强制使用缓存用哪个指令？", answer: "no-cache", hints: "缓存头" },
+                { id: "q3", question: "ETag 的作用？", answer: "验证缓存", hints: "实体标签" }
+            ]
+        }, {
+            id: 27,
+            title: "WebSocket",
+            description: "学习 WebSocket 双向通信",
+            tags: ["🔌 WebSocket", "实时"],
+            questions: [
+                { id: "q1", question: "安装 ws 模块的 npm 命令？", answer: "npm install ws", hints: "npm i ws" },
+                { id: "q2", question: "WebSocket 协议全称？", answer: "WebSocket", hints: "WebSocket" },
+                { id: "q3", question: "WebSocket 和 HTTP 的区别？", answer: "双向通信", hints: "持久连接" }
+            ]
+        }, {
+            id: 28,
+            title: "单元测试",
+            description: "学习 API 单元测试",
+            tags: ["🧪 测试", "质量"],
+            questions: [
+                { id: "q1", question: "安装 Jest 的 npm 命令？", answer: "npm install jest", hints: "npm i jest" },
+                { id: "q2", question: "测试文件命名规范？", answer: "xxx.test.js", hints: ".test.js" },
+                { id: "q3", question: "Jest 中测试断言方法？", answer: "expect()", hints: "断言" }
+            ]
+        }, {
+            id: 29,
+            title: "部署配置",
+            description: "学习 API 部署到生产环境",
+            tags: ["🚀 部署", "运维"],
+            questions: [
+                { id: "q1", question: "生产环境端口应该用哪个？", answer: "环境变量 PORT", hints: "process.env.PORT" },
+                { id: "q2", question: "日志级别生产推荐？", answer: "错误级别", hints: "减少输出" },
+                { id: "q3", question: "PM2 启动命令？", answer: "pm2 start app.js", hints: "进程管理" }
+            ]
+        }, {
+            id: 30,
+            title: "项目实战",
+            description: "综合应用：完成一个完整的 API 项目",
+            tags: ["🎯 实战", "综合"],
+            questions: [
+                { id: "q1", question: "你的项目名称是什么？", answer: "自定义项目名", hints: "想一个名字" },
+                { id: "q2", question: "项目使用的主要技术栈？", answer: "Express + SQLite + JWT", hints: "框架+数据库+认证" },
+                { id: "q3", question: "30天学习的最大收获？", answer: "自定义回答", hints: "总结你的学习" }
+            ]
+        }];
+
+        // ============================================================
+        // 应用状态
+        // ============================================================
+        let currentDay = 0;
+        let mode = 'learn';
+        let completedDays = JSON.parse(localStorage.getItem('completedDays') || '{}');
+        let dayScores = JSON.parse(localStorage.getItem('dayScores') || '{}');
+
+        // ============================================================
+        // 核心函数
+        // ============================================================
+
+        function renderDay(index) {
+            const day = DAYS[index];
+            if (!day) return;
+
+            // 更新头部
+            document.getElementById('currentDayDisplay').textContent = day.id;
+
+            // 更新卡片
+            document.getElementById('dayNumber').textContent = `DAY ${String(day.id).padStart(2, '0')}`;
+            document.getElementById('dayTitle').textContent = day.title;
+            document.getElementById('dayDescription').textContent = day.description;
+
+            // 更新标签
+            const tagsContainer = document.getElementById('tagsContainer');
+            tagsContainer.innerHTML = day.tags.map(tag => `<span>${tag}</span>`).join('');
+
+            // 渲染题目
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            const answers = dayScores[day.id] || {};
+
+            day.questions.forEach((q, qIndex) => {
+                const isAnswered = answers[q.id] !== undefined;
+                const isCorrect = answers[q.id] === true;
+
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                div.innerHTML = `
+                    <div class="q-label">📝 问题 ${qIndex + 1}</div>
+                    <div class="q-text">${q.question}</div>
+                    ${mode === 'learn' ? `<div class="q-learn show">💡 ${q.answer}</div>` : `<div class="q-hint">💡 提示：${q.hints}</div>`}
+                    <div class="input-area">
+                        <input type="text" id="input_${q.id}" placeholder="输入答案..." ${isAnswered ? 'disabled' : ''}>
+                        <button id="btn_${q.id}" onclick="checkAnswer('${q.id}', ${index})" ${isAnswered ? 'disabled' : ''}>
+                            ${isAnswered ? '✅ 已完成' : '提交答案'}
+                        </button>
+                    </div>
+                    <div class="feedback" id="feedback_${q.id}"></div>
+                `;
+
+                // 如果已回答，显示结果
+                if (isAnswered) {
+                    const input = div.querySelector('input');
+                    input.value = localStorage.getItem(`answer_${q.id}`) || '';
+                    input.className = isCorrect ? 'correct' : 'wrong';
+
+                    const feedback = div.querySelector('.feedback');
+                    feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+                    feedback.textContent = isCorrect ? '✅ 回答正确！' : '❌ 回答错误，正确答案：' + q.answer;
+                }
+
+                container.appendChild(div);
+            });
+
+            // 更新得分
+            const total = day.questions.length;
+            const correct = day.questions.filter(q => dayScores[day.id] && dayScores[day.id][q.id] === true).length;
+            document.getElementById('dayScore').textContent = correct;
+            document.getElementById('totalQuestions').textContent = total;
+
+            // 更新进度
+            const completed = Object.keys(completedDays).filter(d => completedDays[d] === true).length;
+            document.getElementById('progressText').textContent = `${completed} / 30`;
+            document.getElementById('progressFill').style.width = `${(completed / 30) * 100}%`;
+
+            // 更新导航
+            document.getElementById('dayIndicator').textContent = `第 ${day.id} / 30 天`;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === DAYS.length - 1;
+
+            // 保存当前天
+            localStorage.setItem('currentDay', index);
+        }
+
+        function checkAnswer(qId, dayIndex) {
+            const day = DAYS[dayIndex];
+            const question = day.questions.find(q => q.id === qId);
+            if (!question) return;
+
+            const input = document.getElementById(`input_${qId}`);
+            const feedback = document.getElementById(`feedback_${qId}`);
+            const btn = document.getElementById(`btn_${qId}`);
+
+            const userAnswer = input.value.trim();
+            const isCorrect = userAnswer.toLowerCase() === question.answer.toLowerCase();
+
+            // 保存答案
+            if (!dayScores[day.id]) dayScores[day.id] = {};
+            dayScores[day.id][qId] = isCorrect;
+            localStorage.setItem('dayScores', JSON.stringify(dayScores));
+            localStorage.setItem(`answer_${qId}`, userAnswer);
+
+            // 显示反馈
+            feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+            feedback.textContent = isCorrect ? '✅ 回答正确！' : `❌ 回答错误，正确答案：${question.answer}`;
+
+            input.className = isCorrect ? 'correct' : 'wrong';
+            input.disabled = true;
+            btn.disabled = true;
+            btn.textContent = isCorrect ? '✅ 已完成' : '❌ 错误';
+
+            // 检查是否全部完成
+            const allAnswered = day.questions.every(q => dayScores[day.id] && dayScores[day.id][q.id] !== undefined);
+            if (allAnswered) {
+                const allCorrect = day.questions.every(q => dayScores[day.id][q.id] === true);
+                if (allCorrect) {
+                    completedDays[day.id] = true;
+                    localStorage.setItem('completedDays', JSON.stringify(completedDays));
+                }
+            }
+
+            // 重新渲染更新得分
+            renderDay(dayIndex);
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('modeLearn').className = `mode-toggle ${newMode === 'learn' ? 'active-learn' : ''}`;
+            document.getElementById('modeTest').className = `mode-toggle ${newMode === 'test' ? 'active-test' : ''}`;
+            renderDay(currentDay);
+        }
+
+        function prevDay() {
+            if (currentDay > 0) {
+                currentDay--;
+                renderDay(currentDay);
+            }
+        }
+
+        function nextDay() {
+            if (currentDay < DAYS.length - 1) {
+                currentDay++;
+                renderDay(currentDay);
+            }
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('currentDay');
+            if (saved) currentDay = parseInt(saved);
+            renderDay(currentDay);
+        });
+    </script>
+
+</body>
+</html>

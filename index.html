@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程学习项目练习导航</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            text-align: center;
+            padding: 40px 0 30px;
+            border-bottom: 1px solid #2a2a3e;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #6c5ce7, #00cec9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #8888aa;
+            margin-top: 12px;
+            font-size: 1.1rem;
+        }
+
+        .header .subtitle {
+            color: #555;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        /* ===== 项目网格 ===== */
+        .grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 0 10px;
+        }
+
+        .project-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px 28px;
+            border: 1px solid #2a2a3e;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6c5ce7, #00cec9);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            border-color: #3a3a5e;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .project-card .name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .project-card .description {
+            color: #8888aa;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-card .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .project-card .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .project-card .tags span {
+            background: #2a2a3e;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        .project-card .status {
+            font-size: 0.8rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #0a2a1a;
+            color: #00cec9;
+            border: 1px solid #00cec9;
+        }
+
+        .status.learning {
+            background: #1a2a0a;
+            color: #fdcb6e;
+            border: 1px solid #fdcb6e;
+        }
+
+        .status.completed {
+            background: #0a1a2a;
+            color: #6c5ce7;
+            border: 1px solid #6c5ce7;
+        }
+
+        .status.planning {
+            background: #2a1a0a;
+            color: #e17055;
+            border: 1px solid #e17055;
+        }
+
+        .project-card .arrow {
+            color: #444;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover .arrow {
+            transform: translateX(5px);
+            color: #6c5ce7;
+        }
+
+        /* ===== 底部 ===== */
+        .footer {
+            text-align: center;
+            padding: 40px 0 20px;
+            margin-top: 40px;
+            border-top: 1px solid #1a1a2e;
+            color: #444;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #6c5ce7;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                padding: 0;
+            }
+
+            .project-card {
+                padding: 22px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 头部 ===== -->
+    <header class="header">
+        <h1>📚 编程学习项目练习导航</h1>
+        <p>我的编程开发学习路线</p>
+        <div class="subtitle">从零开始掌握 Node.js + Express + SQLite</div>
+    </header>
+
+    <!-- ===== 项目卡片网格 ===== -->
+    <div class="grid">
+
+        <!-- ===== 项目1：30天API训练营 ===== -->
+        <a href="git-30day-challenge/index.html" class="project-card">
+            <div class="icon">🚀</div>
+            <div class="name">30天API开发训练营</div>
+            <div class="description">
+                从零开始，30天掌握 RESTful API 开发。<br>
+                包含 HTTP、Express、SQLite、JWT 认证等核心内容。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>🌐 API</span>
+                    <span>⚡ Express</span>
+                    <span>🗄️ SQLite</span>
+                    <span>🔐 JWT</span>
+                </div>
+                <span class="status active">🟢 学习中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                进入项目 →
+            </div>
+        </a>
+
+        <!-- ===== 项目2：你的已有测试 ===== -->
+        <a href="git-30day-challenge/index.html" class="project-card">
+            <div class="icon">🧪</div>
+            <div class="name">30天Git命令打卡计划</div>
+            <div class="description">
+                Git命令，<br>
+                每日练习。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>🧪 测试</span>
+                </div>
+                <span class="status learning">🟡 进行中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                进入项目 →
+            </div>
+        </a>
+
+        <!-- ===== 项目3：SQLite 练习 ===== -->
+        <a href="30days-SQLite-training/index.html" class="project-card">
+            <div class="icon">🗄️</div>
+            <div class="name">SQLite 练习场</div>
+            <div class="description">
+                SQLite 数据库操作练习，<br>
+                包含 CRUD、JOIN、事务、索引等。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>🗄️ SQLite</span>
+                    <span>📝 SQL</span>
+                </div>
+                <span class="status planning">🟢 学习中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                进入项目 →
+            </div>
+        </a>
+
+        <!-- ===== 项目4：Express 实战 ===== -->
+        <a href="express-practice/index.html" class="project-card">
+            <div class="icon">⚡</div>
+            <div class="name">Express 实战</div>
+            <div class="description">
+                Express 框架实战练习，<br>
+                包含中间件、路由、错误处理等。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>⚡ Express</span>
+                    <span>🔌 中间件</span>
+                </div>
+                <span class="status planning">🔴 规划中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                即将上线 →
+            </div>
+        </a>
+
+        <!-- ===== 项目5：JWT 认证练习 ===== -->
+        <a href="jwt-practice/index.html" class="project-card">
+            <div class="icon">🔐</div>
+            <div class="name">JWT 认证练习</div>
+            <div class="description">
+                JWT 令牌认证实战，<br>
+                包含登录、注册、令牌刷新等。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>🎫 JWT</span>
+                    <span>🔑 认证</span>
+                </div>
+                <span class="status planning">🔴 规划中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                即将上线 →
+            </div>
+        </a>
+
+        <!-- ===== 项目6：完整项目实战 ===== -->
+        <a href="full-project/index.html" class="project-card">
+            <div class="icon">🎯</div>
+            <div class="name">完整项目实战</div>
+            <div class="description">
+                综合运用所学知识，<br>
+                完成一个完整的全栈项目。
+            </div>
+            <div class="meta">
+                <div class="tags">
+                    <span>🎯 综合</span>
+                    <span>📦 全栈</span>
+                </div>
+                <span class="status planning">🔴 规划中</span>
+            </div>
+            <div style="margin-top:12px; text-align:right; color:#444; font-size:0.9rem;">
+                即将上线 →
+            </div>
+        </a>
+
+    </div>
+
+    <!-- ===== 底部 ===== -->
+    <footer class="footer">
+        <p>
+            🚀 持续学习中 · 
+            <a href="https://github.com/你的用户名" target="_blank">GitHub</a> · 
+            <a href="https://你的博客地址" target="_blank">博客</a>
+        </p>
+        <p style="margin-top: 8px; font-size: 0.8rem; color: #333;">
+            第 <span id="dayCount"></span> 天 · 持续更新中
+        </p>
+    </footer>
+
+    <script>
+        // ===== 计算学习天数 =====
+        (function() {
+            const startDate = new Date('2025-07-01'); // 改成你开始学习的日期
+            const today = new Date();
+            const diffTime = Math.abs(today - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('dayCount').textContent = diffDays;
+        })();
+    </script>
+
+</body>
+</html>

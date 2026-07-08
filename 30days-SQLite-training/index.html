@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30天SQLite数据库训练营</title>
+    <style>
+        /* ===== 基础重置 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #2a2a3e;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #8888aa;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #2a2a3e;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #fdcb6e;
+            margin-top: 10px;
+        }
+
+        /* ===== 模式切换 ===== */
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-toggle button {
+            padding: 12px 40px;
+            border: 2px solid #2a2a3e;
+            border-radius: 30px;
+            background: transparent;
+            color: #8888aa;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .mode-toggle button:hover {
+            border-color: #fdcb6e;
+            color: #e0e0e0;
+        }
+
+        .mode-toggle button.active-learn {
+            border-color: #fdcb6e;
+            background: #fdcb6e;
+            color: #0f0f1a;
+            box-shadow: 0 0 30px rgba(253, 203, 110, 0.3);
+        }
+
+        .mode-toggle button.active-test {
+            border-color: #e17055;
+            background: #e17055;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(225, 112, 85, 0.3);
+        }
+
+        /* ===== 进度条 ===== */
+        .progress-container {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px 25px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #8888aa;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #2a2a3e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fdcb6e, #e17055);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* ===== 主卡片 ===== */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .day-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 35px 40px;
+            border: 1px solid #2a2a3e;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .day-card:hover {
+            border-color: #3a3a5e;
+        }
+
+        .day-number {
+            display: inline-block;
+            background: #2a2a3e;
+            padding: 4px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #fdcb6e;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .day-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .day-card .description {
+            color: #8888aa;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        /* ===== 标签 ===== */
+        .tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .tags span {
+            background: #2a2a3e;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .tags .tag-ddl {
+            background: #1a2a3e;
+            color: #fdcb6e;
+        }
+
+        .tags .tag-dml {
+            background: #1a2e1a;
+            color: #00cec9;
+        }
+
+        .tags .tag-adv {
+            background: #2e1a2a;
+            color: #fd79a8;
+        }
+
+        /* ===== 问题区域 ===== */
+        .question-item {
+            background: #0f0f1a;
+            border-radius: 15px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            border-left: 3px solid #fdcb6e;
+        }
+
+        .question-item .q-label {
+            font-size: 0.8rem;
+            color: #fdcb6e;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-item .q-text {
+            margin-top: 8px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            background: #0a0a15;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #1a1a2e;
+        }
+
+        .question-item .q-hint {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .question-item .q-answer {
+            background: #0a1a0a;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            color: #00cec9;
+            font-size: 0.95rem;
+            font-family: 'Courier New', monospace;
+            display: none;
+            border: 1px solid #1a3a1a;
+        }
+
+        .question-item .q-answer.show {
+            display: block;
+        }
+
+        /* ===== 输入区域 ===== */
+        .input-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-area input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 2px solid #2a2a3e;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #fdcb6e;
+        }
+
+        .input-area input.correct {
+            border-color: #00cec9;
+            background: #0a1a1a;
+        }
+
+        .input-area input.wrong {
+            border-color: #e17055;
+            background: #1a0a0a;
+        }
+
+        .input-area button {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            background: #fdcb6e;
+            color: #0f0f1a;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .input-area button:hover {
+            background: #fdcb6e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(253, 203, 110, 0.3);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== 反馈 ===== */
+        .feedback {
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-top: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #0a2a1a;
+            border: 1px solid #00cec9;
+            color: #00cec9;
+        }
+
+        .feedback.error {
+            background: #2a0a0a;
+            border: 1px solid #e17055;
+            color: #e17055;
+        }
+
+        .feedback .hint {
+            color: #8888aa;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 得分 ===== */
+        .score-display {
+            text-align: center;
+            padding: 15px;
+            background: #0f0f1a;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .score-display .score-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== 导航 ===== */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #2a2a3e;
+        }
+
+        .navigation button {
+            padding: 12px 30px;
+            border-radius: 12px;
+            border: 2px solid #2a2a3e;
+            background: transparent;
+            color: #8888aa;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .navigation button:hover:not(:disabled) {
+            border-color: #fdcb6e;
+            color: #e0e0e0;
+            background: #1a1a2e;
+        }
+
+        .navigation button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .navigation .day-indicator {
+            color: #8888aa;
+            font-size: 0.9rem;
+        }
+
+        /* ===== SQL 高亮 ===== */
+        .sql-highlight {
+            color: #fdcb6e;
+        }
+
+        .sql-keyword {
+            color: #fd79a8;
+        }
+
+        .sql-string {
+            color: #00cec9;
+        }
+
+        .sql-comment {
+            color: #555;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .day-card {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .input-area {
+                flex-direction: column;
+            }
+            .input-area input {
+                min-width: auto;
+            }
+            .navigation {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            .mode-toggle button {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ===== 滚动条 ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a3e;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a5e;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 头部 ===== -->
+    <header class="header">
+        <h1>🗄️ 30天SQLite数据库训练营</h1>
+        <p>从零开始掌握 SQLite 数据库的每一个知识点</p>
+        <span class="badge">📅 Day <span id="currentDayDisplay">1</span> / 30</span>
+    </header>
+
+    <!-- ===== 模式切换 ===== -->
+    <div class="mode-toggle">
+        <button id="modeLearn" class="active-learn" onclick="setMode('learn')">📖 学习模式</button>
+        <button id="modeTest" onclick="setMode('test')">🎯 测试模式</button>
+    </div>
+
+    <!-- ===== 进度条 ===== -->
+    <div class="progress-container">
+        <div class="progress-header">
+            <span>📊 学习进度</span>
+            <span id="progressText">0 / 30</span>
+        </div>
+        <div class="progress-bar">
+            <div class="fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- ===== 主内容 ===== -->
+    <div class="container">
+        <div class="day-card" id="dayCard">
+            <div class="day-number" id="dayNumber">DAY 01</div>
+            <h2 id="dayTitle">加载中...</h2>
+            <p class="description" id="dayDescription">请等待数据加载...</p>
+            <div class="tags" id="tagsContainer"></div>
+            <div id="questionsContainer"></div>
+
+            <div class="score-display">
+                <span>⭐ 本日得分：</span>
+                <span class="score-number" id="dayScore">0</span>
+                <span> / <span id="totalQuestions">0</span></span>
+            </div>
+
+            <div class="navigation">
+                <button id="prevBtn" onclick="prevDay()">⬅ 前一天</button>
+                <span class="day-indicator" id="dayIndicator">第 1 / 30 天</span>
+                <button id="nextBtn" onclick="nextDay()">后一天 ➡</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 数据：30 天 SQLite 题目
+        // ============================================================
+        const DAYS = [{
+            id: 1,
+            title: "什么是 SQLite",
+            description: "了解 SQLite 的特点、优势和适用场景",
+            tags: ["📖 基础", "介绍"],
+            questions: [{
+                id: "q1",
+                question: "SQLite 是什么类型的数据库？",
+                answer: "嵌入式关系型数据库",
+                hints: "嵌入式的，文件型的"
+            }, {
+                id: "q2",
+                question: "SQLite 的数据存储在哪里？",
+                answer: "一个文件中",
+                hints: "以 .db 结尾的文件"
+            }, {
+                id: "q3",
+                question: "SQLite 是否需要独立的服务器进程？",
+                answer: "不需要",
+                hints: "零配置"
+            }]
+        }, {
+            id: 2,
+            title: "创建数据库和表",
+            description: "学习创建 SQLite 数据库和表的基本语法",
+            tags: ["📝 DDL", "CREATE TABLE"],
+            questions: [{
+                id: "q1",
+                question: "创建 users 表的 SQL 语句是？",
+                answer: "CREATE TABLE users",
+                hints: "CREATE TABLE 表名"
+            }, {
+                id: "q2",
+                question: "自增主键的写法是？",
+                answer: "AUTOINCREMENT",
+                hints: "自动增长的"
+            }, {
+                id: "q3",
+                question: "查看数据库中所有表的命令是？",
+                answer: ".tables",
+                hints: "以 . 开头的命令"
+            }]
+        }, {
+            id: 3,
+            title: "数据类型",
+            description: "学习 SQLite 的 5 种核心数据类型",
+            tags: ["📊 类型", "数据"],
+            questions: [{
+                id: "q1",
+                question: "SQLite 中存储整数的类型是？",
+                answer: "INTEGER",
+                hints: "整型"
+            }, {
+                id: "q2",
+                question: "SQLite 中存储字符串的类型是？",
+                answer: "TEXT",
+                hints: "文本"
+            }, {
+                id: "q3",
+                question: "SQLite 中存储小数的类型是？",
+                answer: "REAL",
+                hints: "浮点数"
+            }]
+        }, {
+            id: 4,
+            title: "约束 Constraint",
+            description: "学习 NOT NULL、UNIQUE、DEFAULT 等约束",
+            tags: ["🔒 约束", "完整性"],
+            questions: [{
+                id: "q1",
+                question: "字段不能为空的约束是？",
+                answer: "NOT NULL",
+                hints: "非空"
+            }, {
+                id: "q2",
+                question: "字段值必须唯一的约束是？",
+                answer: "UNIQUE",
+                hints: "唯一"
+            }, {
+                id: "q3",
+                question: "设置默认值的约束是？",
+                answer: "DEFAULT",
+                hints: "默认"
+            }]
+        }, {
+            id: 5,
+            title: "INSERT 插入",
+            description: "学习向表中插入数据的各种方式",
+            tags: ["📝 DML", "INSERT"],
+            questions: [{
+                id: "q1",
+                question: "插入一条数据的 SQL 语句？",
+                answer: "INSERT INTO users (name) VALUES ('Alice')",
+                hints: "INSERT INTO 表名 (字段) VALUES (值)"
+            }, {
+                id: "q2",
+                question: "一次插入多条数据的写法？",
+                answer: "INSERT INTO users (name) VALUES ('Alice'), ('Bob')",
+                hints: "用逗号分隔多个值"
+            }, {
+                id: "q3",
+                question: "INSERT OR REPLACE 的作用是？",
+                answer: "存在则替换，不存在则插入",
+                hints: "覆盖插入"
+            }]
+        }, {
+            id: 6,
+            title: "SELECT 查询基础",
+            description: "学习最基本的查询语句",
+            tags: ["🔍 DQL", "SELECT"],
+            questions: [{
+                id: "q1",
+                question: "查询所有字段的 SQL 是？",
+                answer: "SELECT * FROM users",
+                hints: "查询全部"
+            }, {
+                id: "q2",
+                question: "查询指定字段的 SQL 是？",
+                answer: "SELECT id, name FROM users",
+                hints: "只查部分字段"
+            }, {
+                id: "q3",
+                question: "查询时起别名用什么关键字？",
+                answer: "AS",
+                hints: "别名"
+            }]
+        }, {
+            id: 7,
+            title: "WHERE 条件查询",
+            description: "学习使用 WHERE 进行条件筛选",
+            tags: ["🔍 DQL", "WHERE"],
+            questions: [{
+                id: "q1",
+                question: "查询 id=1 的用户？",
+                answer: "SELECT * FROM users WHERE id = 1",
+                hints: "WHERE 条件"
+            }, {
+                id: "q2",
+                question: "查询年龄大于 18 的用户？",
+                answer: "SELECT * FROM users WHERE age > 18",
+                hints: "大于"
+            }, {
+                id: "q3",
+                question: "多条件查询使用什么操作符？",
+                answer: "AND",
+                hints: "同时满足"
+            }]
+        }, {
+            id: 8,
+            title: "LIKE 模糊查询",
+            description: "学习使用 LIKE 进行模式匹配",
+            tags: ["🔍 DQL", "LIKE"],
+            questions: [{
+                id: "q1",
+                question: "查询名字以 'A' 开头的用户？",
+                answer: "SELECT * FROM users WHERE name LIKE 'A%'",
+                hints: "% 通配符"
+            }, {
+                id: "q2",
+                question: "查询名字包含 'a' 的用户？",
+                answer: "SELECT * FROM users WHERE name LIKE '%a%'",
+                hints: "前后都有 %"
+            }, {
+                id: "q3",
+                question: "查询名字以 'e' 结尾的用户？",
+                answer: "SELECT * FROM users WHERE name LIKE '%e'",
+                hints: "以 e 结尾"
+            }]
+        }, {
+            id: 9,
+            title: "ORDER BY 排序",
+            description: "学习对查询结果进行排序",
+            tags: ["🔍 DQL", "ORDER BY"],
+            questions: [{
+                id: "q1",
+                question: "按年龄升序排列？",
+                answer: "SELECT * FROM users ORDER BY age ASC",
+                hints: "升序"
+            }, {
+                id: "q2",
+                question: "按年龄降序排列？",
+                answer: "SELECT * FROM users ORDER BY age DESC",
+                hints: "降序"
+            }, {
+                id: "q3",
+                question: "多字段排序怎么写？",
+                answer: "ORDER BY age DESC, name ASC",
+                hints: "先按 age 排，再按 name 排"
+            }]
+        }, {
+            id: 10,
+            title: "LIMIT 分页",
+            description: "学习使用 LIMIT 和 OFFSET 实现分页",
+            tags: ["🔍 DQL", "LIMIT"],
+            questions: [{
+                id: "q1",
+                question: "查询前 10 条数据？",
+                answer: "SELECT * FROM users LIMIT 10",
+                hints: "只取前 N 条"
+            }, {
+                id: "q2",
+                question: "查询第 11 到 20 条数据？",
+                answer: "SELECT * FROM users LIMIT 10 OFFSET 10",
+                hints: "跳过 10 条取 10 条"
+            }, {
+                id: "q3",
+                question: "简写 LIMIT 10 OFFSET 5 是什么？",
+                answer: "LIMIT 5, 10",
+                hints: "跳过 5 条取 10 条"
+            }]
+        }, {
+            id: 11,
+            title: "聚合函数",
+            description: "学习 COUNT、SUM、AVG、MAX、MIN",
+            tags: ["📊 聚合", "函数"],
+            questions: [{
+                id: "q1",
+                question: "统计用户总数的 SQL？",
+                answer: "SELECT COUNT(*) FROM users",
+                hints: "计数"
+            }, {
+                id: "q2",
+                question: "计算所有用户平均年龄？",
+                answer: "SELECT AVG(age) FROM users",
+                hints: "平均值"
+            }, {
+                id: "q3",
+                question: "查询最大年龄的 SQL？",
+                answer: "SELECT MAX(age) FROM users",
+                hints: "最大值"
+            }]
+        }, {
+            id: 12,
+            title: "GROUP BY 分组",
+            description: "学习使用 GROUP BY 进行数据分组",
+            tags: ["📊 分组", "GROUP BY"],
+            questions: [{
+                id: "q1",
+                question: "按年龄分组统计人数？",
+                answer: "SELECT age, COUNT(*) FROM users GROUP BY age",
+                hints: "GROUP BY 字段"
+            }, {
+                id: "q2",
+                question: "分组后过滤用什么？",
+                answer: "HAVING",
+                hints: "HAVING 条件"
+            }, {
+                id: "q3",
+                question: "统计每个年龄段的平均工资？",
+                answer: "SELECT age, AVG(salary) FROM users GROUP BY age",
+                hints: "分组聚合"
+            }]
+        }, {
+            id: 13,
+            title: "UPDATE 更新",
+            description: "学习更新表中数据",
+            tags: ["📝 DML", "UPDATE"],
+            questions: [{
+                id: "q1",
+                question: "更新 id=1 的用户名？",
+                answer: "UPDATE users SET name = 'NewName' WHERE id = 1",
+                hints: "WHERE 条件很重要"
+            }, {
+                id: "q2",
+                question: "同时更新多个字段？",
+                answer: "UPDATE users SET name = 'NewName', age = 25 WHERE id = 1",
+                hints: "用逗号分隔"
+            }, {
+                id: "q3",
+                question: "更新所有数据（危险操作）？",
+                answer: "UPDATE users SET name = 'Default'",
+                hints: "没有 WHERE"
+            }]
+        }, {
+            id: 14,
+            title: "DELETE 删除",
+            description: "学习删除数据，注意 WHERE 条件",
+            tags: ["📝 DML", "DELETE"],
+            questions: [{
+                id: "q1",
+                question: "删除 id=1 的用户？",
+                answer: "DELETE FROM users WHERE id = 1",
+                hints: "WHERE 条件"
+            }, {
+                id: "q2",
+                question: "删除所有年龄大于 50 的用户？",
+                answer: "DELETE FROM users WHERE age > 50",
+                hints: "条件删除"
+            }, {
+                id: "q3",
+                question: "删除所有数据（危险操作）？",
+                answer: "DELETE FROM users",
+                hints: "没有 WHERE"
+            }]
+        }, {
+            id: 15,
+            title: "DROP TABLE",
+            description: "学习删除表结构",
+            tags: ["📝 DDL", "DROP"],
+            questions: [{
+                id: "q1",
+                question: "删除 users 表？",
+                answer: "DROP TABLE users",
+                hints: "删除表结构"
+            }, {
+                id: "q2",
+                question: "删除表前检查是否存在？",
+                answer: "DROP TABLE IF EXISTS users",
+                hints: "IF EXISTS"
+            }, {
+                id: "q3",
+                question: "DROP 和 DELETE 的区别？",
+                answer: "DROP 删除表结构，DELETE 删除数据",
+                hints: "一个删结构，一个删数据"
+            }]
+        }, {
+            id: 16,
+            title: "ALTER TABLE",
+            description: "学习修改表结构",
+            tags: ["📝 DDL", "ALTER"],
+            questions: [{
+                id: "q1",
+                question: "添加一列的 SQL？",
+                answer: "ALTER TABLE users ADD COLUMN email TEXT",
+                hints: "ADD COLUMN"
+            }, {
+                id: "q2",
+                question: "重命名表？",
+                answer: "ALTER TABLE users RENAME TO new_users",
+                hints: "RENAME TO"
+            }, {
+                id: "q3",
+                question: "重命名列？",
+                answer: "ALTER TABLE users RENAME COLUMN name TO fullname",
+                hints: "RENAME COLUMN"
+            }]
+        }, {
+            id: 17,
+            title: "INNER JOIN",
+            description: "学习内连接查询",
+            tags: ["🔗 JOIN", "内连接"],
+            questions: [{
+                id: "q1",
+                question: "INNER JOIN 的作用？",
+                answer: "返回两个表中匹配的数据",
+                hints: "取交集"
+            }, {
+                id: "q2",
+                question: "查询用户及其订单？",
+                answer: "SELECT * FROM users INNER JOIN orders ON users.id = orders.user_id",
+                hints: "ON 连接条件"
+            }, {
+                id: "q3",
+                question: "三表 JOIN 怎么写？",
+                answer: "SELECT * FROM table1 JOIN table2 ON ... JOIN table3 ON ...",
+                hints: "连续 JOIN"
+            }]
+        }, {
+            id: 18,
+            title: "LEFT JOIN",
+            description: "学习左连接查询",
+            tags: ["🔗 JOIN", "左连接"],
+            questions: [{
+                id: "q1",
+                question: "LEFT JOIN 的作用？",
+                answer: "返回左表全部数据，右表匹配的则显示",
+                hints: "左表全部"
+            }, {
+                id: "q2",
+                question: "查询所有用户及其订单（无订单也要显示）？",
+                answer: "SELECT * FROM users LEFT JOIN orders ON users.id = orders.user_id",
+                hints: "LEFT JOIN"
+            }, {
+                id: "q3",
+                question: "LEFT JOIN 和 INNER JOIN 的区别？",
+                answer: "LEFT JOIN 返回左表全部，INNER JOIN 只返回匹配的",
+                hints: "范围不同"
+            }]
+        }, {
+            id: 19,
+            title: "外键约束",
+            description: "学习 FOREIGN KEY 的使用",
+            tags: ["🔒 约束", "外键"],
+            questions: [{
+                id: "q1",
+                question: "创建外键的语法？",
+                answer: "FOREIGN KEY (user_id) REFERENCES users(id)",
+                hints: "外键参照"
+            }, {
+                id: "q2",
+                question: "ON DELETE CASCADE 的作用？",
+                answer: "删除用户时同时删除其关联数据",
+                hints: "级联删除"
+            }, {
+                id: "q3",
+                question: "外键的作用？",
+                answer: "保证数据完整性",
+                hints: "约束"
+            }]
+        }, {
+            id: 20,
+            title: "索引 Index",
+            description: "学习创建和使用索引优化查询",
+            tags: ["📊 索引", "优化"],
+            questions: [{
+                id: "q1",
+                question: "创建索引的 SQL？",
+                answer: "CREATE INDEX idx_name ON users(name)",
+                hints: "CREATE INDEX"
+            }, {
+                id: "q2",
+                question: "索引的作用？",
+                answer: "提高查询速度",
+                hints: "加速查询"
+            }, {
+                id: "q3",
+                question: "查看索引的命令？",
+                answer: ".indexes users",
+                hints: "查看表索引"
+            }]
+        }, {
+            id: 21,
+            title: "事务 Transaction",
+            description: "学习事务的 ACID 特性",
+            tags: ["🔄 事务", "ACID"],
+            questions: [{
+                id: "q1",
+                question: "开始事务的 SQL？",
+                answer: "BEGIN TRANSACTION",
+                hints: "BEGIN"
+            }, {
+                id: "q2",
+                question: "提交事务的 SQL？",
+                answer: "COMMIT",
+                hints: "提交"
+            }, {
+                id: "q3",
+                question: "回滚事务的 SQL？",
+                answer: "ROLLBACK",
+                hints: "撤销"
+            }]
+        }, {
+            id: 22,
+            title: "子查询",
+            description: "学习使用子查询",
+            tags: ["🔍 子查询", "嵌套"],
+            questions: [{
+                id: "q1",
+                question: "查询年龄大于平均年龄的用户？",
+                answer: "SELECT * FROM users WHERE age > (SELECT AVG(age) FROM users)",
+                hints: "子查询"
+            }, {
+                id: "q2",
+                question: "查询有订单的用户？",
+                answer: "SELECT * FROM users WHERE id IN (SELECT user_id FROM orders)",
+                hints: "IN 子查询"
+            }, {
+                id: "q3",
+                question: "EXISTS 子查询的作用？",
+                answer: "检查子查询是否有结果",
+                hints: "存在性检查"
+            }]
+        }, {
+            id: 23,
+            title: "视图 View",
+            description: "学习创建和使用视图",
+            tags: ["👁️ 视图", "虚拟表"],
+            questions: [{
+                id: "q1",
+                question: "创建视图的 SQL？",
+                answer: "CREATE VIEW user_orders AS SELECT ...",
+                hints: "CREATE VIEW"
+            }, {
+                id: "q2",
+                question: "视图的作用？",
+                answer: "简化复杂查询",
+                hints: "虚拟表"
+            }, {
+                id: "q3",
+                question: "删除视图的 SQL？",
+                answer: "DROP VIEW user_orders",
+                hints: "DROP VIEW"
+            }]
+        }, {
+            id: 24,
+            title: "日期时间函数",
+            description: "学习 SQLite 的日期时间函数",
+            tags: ["📅 日期", "函数"],
+            questions: [{
+                id: "q1",
+                question: "获取当前时间？",
+                answer: "CURRENT_TIMESTAMP",
+                hints: "当前时间戳"
+            }, {
+                id: "q2",
+                question: "获取当前日期？",
+                answer: "DATE('now')",
+                hints: "DATE 函数"
+            }, {
+                id: "q3",
+                question: "时间加减的写法？",
+                answer: "datetime('now', '+1 day')",
+                hints: "加减"
+            }]
+        }, {
+            id: 25,
+            title: "字符串函数",
+            description: "学习 SQLite 的字符串处理函数",
+            tags: ["📝 字符串", "函数"],
+            questions: [{
+                id: "q1",
+                question: "字符串拼接的写法？",
+                answer: "SELECT name || ' - ' || age FROM users",
+                hints: "|| 连接符"
+            }, {
+                id: "q2",
+                question: "转换为大写？",
+                answer: "UPPER(name)",
+                hints: "大写"
+            }, {
+                id: "q3",
+                question: "字符串长度？",
+                answer: "LENGTH(name)",
+                hints: "长度"
+            }]
+        }, {
+            id: 26,
+            title: "JSON 支持",
+            description: "学习 SQLite 的 JSON 操作",
+            tags: ["📦 JSON", "函数"],
+            questions: [{
+                id: "q1",
+                question: "从 JSON 中提取字段？",
+                answer: "json_extract(data, '$.name')",
+                hints: "提取 JSON 字段"
+            }, {
+                id: "q2",
+                question: "检查字段是否为 JSON？",
+                answer: "json_valid(data)",
+                hints: "验证 JSON"
+            }, {
+                id: "q3",
+                question: "创建 JSON 对象？",
+                answer: "json_object('name', name, 'age', age)",
+                hints: "生成 JSON"
+            }]
+        }, {
+            id: 27,
+            title: "SQLite 命令行",
+            description: "学习 SQLite 命令行工具的使用",
+            tags: ["💻 命令行", "工具"],
+            questions: [{
+                id: "q1",
+                question: "进入 SQLite 的命令？",
+                answer: "sqlite3 test.db",
+                hints: "sqlite3 数据库名"
+            }, {
+                id: "q2",
+                question: "查看所有表的命令？",
+                answer: ".tables",
+                hints: ".tables"
+            }, {
+                id: "q3",
+                question: "查看表结构的命令？",
+                answer: ".schema users",
+                hints: ".schema 表名"
+            }]
+        }, {
+            id: 28,
+            title: "数据库导入导出",
+            description: "学习导入导出数据",
+            tags: ["💾 导入导出", "备份"],
+            questions: [{
+                id: "q1",
+                question: "导出整个数据库？",
+                answer: ".dump > backup.sql",
+                hints: ".dump"
+            }, {
+                id: "q2",
+                question: "导入 SQL 文件？",
+                answer: ".read backup.sql",
+                hints: ".read"
+            }, {
+                id: "q3",
+                question: "导出为 CSV？",
+                answer: ".mode csv .output data.csv SELECT * FROM users",
+                hints: "CSV 格式"
+            }]
+        }, {
+            id: 29,
+            title: "性能优化",
+            description: "学习 SQLite 性能优化技巧",
+            tags: ["⚡ 性能", "优化"],
+            questions: [{
+                id: "q1",
+                question: "分析查询性能的命令？",
+                answer: "EXPLAIN QUERY PLAN SELECT * FROM users",
+                hints: "EXPLAIN"
+            }, {
+                id: "q2",
+                question: "清理未使用空间？",
+                answer: "VACUUM",
+                hints: "VACUUM"
+            }, {
+                id: "q3",
+                question: "优化内存缓存的 PRAGMA？",
+                answer: "PRAGMA cache_size = 10000",
+                hints: "PRAGMA"
+            }]
+        }, {
+            id: 30,
+            title: "综合实战",
+            description: "综合运用所有知识，完成一个完整的数据库设计",
+            tags: ["🎯 综合", "实战"],
+            questions: [{
+                id: "q1",
+                question: "设计一个博客系统需要哪些表？",
+                answer: "users, posts, comments, categories",
+                hints: "用户、文章、评论、分类"
+            }, {
+                id: "q2",
+                question: "评论表的外键是？",
+                answer: "user_id 和 post_id",
+                hints: "关联用户和文章"
+            }, {
+                id: "q3",
+                question: "查询某篇文章的所有评论？",
+                answer: "SELECT * FROM comments WHERE post_id = 1 ORDER BY created_at DESC",
+                hints: "按文章 ID 查询"
+            }]
+        }];
+
+        // ============================================================
+        // 应用状态
+        // ============================================================
+        let currentDay = 0;
+        let mode = 'learn';
+        let completedDays = JSON.parse(localStorage.getItem('sqlite_completedDays') || '{}');
+        let dayScores = JSON.parse(localStorage.getItem('sqlite_dayScores') || '{}');
+
+        // ============================================================
+        // 核心函数
+        // ============================================================
+
+        function renderDay(index) {
+            const day = DAYS[index];
+            if (!day) return;
+
+            // 更新头部
+            document.getElementById('currentDayDisplay').textContent = day.id;
+
+            // 更新卡片
+            document.getElementById('dayNumber').textContent = `DAY ${String(day.id).padStart(2, '0')}`;
+            document.getElementById('dayTitle').textContent = day.title;
+            document.getElementById('dayDescription').textContent = day.description;
+
+            // 更新标签
+            const tagsContainer = document.getElementById('tagsContainer');
+            tagsContainer.innerHTML = day.tags.map(tag => `<span>${tag}</span>`).join('');
+
+            // 渲染题目
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            day.questions.forEach((q, qIndex) => {
+                const isAnswered = dayScores[day.id] && dayScores[day.id][q.id] !== undefined;
+                const isCorrect = dayScores[day.id] && dayScores[day.id][q.id] === true;
+
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                div.innerHTML = `
+                    <div class="q-label">📝 问题 ${qIndex + 1}</div>
+                    <div class="q-text">${q.question}</div>
+                    ${mode === 'learn' ? `<div class="q-answer show">✅ ${q.answer}</div>` : `<div class="q-hint">💡 提示：${q.hints}</div>`}
+                    <div class="input-area">
+                        <input type="text" id="input_${q.id}" placeholder="输入 SQL 命令..." ${isAnswered ? 'disabled' : ''}>
+                        <button id="btn_${q.id}" onclick="checkAnswer('${q.id}', ${index})" ${isAnswered ? 'disabled' : ''}>
+                            ${isAnswered ? (isCorrect ? '✅ 正确' : '❌ 错误') : '提交答案'}
+                        </button>
+                    </div>
+                    <div class="feedback" id="feedback_${q.id}"></div>
+                `;
+
+                // 如果已回答，显示结果
+                if (isAnswered) {
+                    const input = div.querySelector('input');
+                    const savedAnswer = localStorage.getItem(`sqlite_answer_${q.id}`) || '';
+                    input.value = savedAnswer;
+                    input.className = isCorrect ? 'correct' : 'wrong';
+
+                    const feedback = div.querySelector('.feedback');
+                    feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+                    feedback.textContent = isCorrect ? '✅ 回答正确！' : `❌ 回答错误，正确答案：${q.answer}`;
+                }
+
+                container.appendChild(div);
+            });
+
+            // 更新得分
+            const total = day.questions.length;
+            const correct = day.questions.filter(q => dayScores[day.id] && dayScores[day.id][q.id] === true).length;
+            document.getElementById('dayScore').textContent = correct;
+            document.getElementById('totalQuestions').textContent = total;
+
+            // 更新进度
+            const completed = Object.keys(completedDays).filter(d => completedDays[d] === true).length;
+            document.getElementById('progressText').textContent = `${completed} / 30`;
+            document.getElementById('progressFill').style.width = `${(completed / 30) * 100}%`;
+
+            // 更新导航
+            document.getElementById('dayIndicator').textContent = `第 ${day.id} / 30 天`;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === DAYS.length - 1;
+
+            // 保存当前天
+            localStorage.setItem('sqlite_currentDay', index);
+        }
+
+        function checkAnswer(qId, dayIndex) {
+            const day = DAYS[dayIndex];
+            const question = day.questions.find(q => q.id === qId);
+            if (!question) return;
+
+            const input = document.getElementById(`input_${qId}`);
+            const feedback = document.getElementById(`feedback_${qId}`);
+            const btn = document.getElementById(`btn_${qId}`);
+
+            const userAnswer = input.value.trim();
+            
+            // 宽松匹配：忽略大小写、多余空格
+            const normalize = (s) => s.toLowerCase().replace(/\s+/g, ' ');
+            const isCorrect = normalize(userAnswer) === normalize(question.answer);
+
+            // 保存答案
+            if (!dayScores[day.id]) dayScores[day.id] = {};
+            dayScores[day.id][qId] = isCorrect;
+            localStorage.setItem('sqlite_dayScores', JSON.stringify(dayScores));
+            localStorage.setItem(`sqlite_answer_${qId}`, userAnswer);
+
+            // 显示反馈
+            feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+            feedback.innerHTML = isCorrect ? 
+                '✅ 回答正确！' : 
+                `❌ 回答错误，正确答案：<span style="color:#fdcb6e;font-family:Courier New">${question.answer}</span>`;
+
+            input.className = isCorrect ? 'correct' : 'wrong';
+            input.disabled = true;
+            btn.disabled = true;
+            btn.textContent = isCorrect ? '✅ 正确' : '❌ 错误';
+
+            // 检查是否全部完成
+            const allAnswered = day.questions.every(q => dayScores[day.id] && dayScores[day.id][q.id] !== undefined);
+            if (allAnswered) {
+                const allCorrect = day.questions.every(q => dayScores[day.id][q.id] === true);
+                if (allCorrect) {
+                    completedDays[day.id] = true;
+                    localStorage.setItem('sqlite_completedDays', JSON.stringify(completedDays));
+                }
+            }
+
+            // 重新渲染更新得分
+            renderDay(dayIndex);
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('modeLearn').className = `mode-toggle ${newMode === 'learn' ? 'active-learn' : ''}`;
+            document.getElementById('modeTest').className = `mode-toggle ${newMode === 'test' ? 'active-test' : ''}`;
+            renderDay(currentDay);
+        }
+
+        function prevDay() {
+            if (currentDay > 0) {
+                currentDay--;
+                renderDay(currentDay);
+            }
+        }
+
+        function nextDay() {
+            if (currentDay < DAYS.length - 1) {
+                currentDay++;
+                renderDay(currentDay);
+            }
+        }
+
+        // ============================================================
+        // 键盘快捷键
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && !e.ctrlKey) {
+                prevDay();
+                e.preventDefault();
+            }
+            if (e.key === 'ArrowRight' && !e.ctrlKey) {
+                nextDay();
+                e.preventDefault();
+            }
+        });
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('sqlite_currentDay');
+            if (saved) currentDay = parseInt(saved);
+            renderDay(currentDay);
+        });
+    </script>
+
+</body>
+</html>
