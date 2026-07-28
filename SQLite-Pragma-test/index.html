@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLite 命令练习测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .question-card {
+            background: white;
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid #007bff;
+            transition: border-color 0.2s;
+        }
+        .question-card.correct {
+            border-left-color: #28a745;
+        }
+        .question-card.incorrect {
+            border-left-color: #dc3545;
+        }
+        .question-card .q-title {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .question-card .q-desc {
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+        }
+        .question-card .input-group {
+            max-width: 600px;
+        }
+        .question-card .result-msg {
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .result-msg.correct {
+            color: #28a745;
+        }
+        .result-msg.incorrect {
+            color: #dc3545;
+        }
+        .result-msg .answer-show {
+            font-weight: normal;
+            background: #f1f1f1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        #stats {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        #stats .stat-item {
+            font-size: 1.05rem;
+        }
+        #stats .stat-item strong {
+            font-weight: 600;
+        }
+        .btn-check-answer {
+            min-width: 80px;
+        }
+        .btn-reset {
+            margin-left: auto;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #6c757d;
+        }
+        @media (max-width: 576px) {
+            .question-card .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .question-card .input-group .form-control {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-2">📚 SQLite 命令练习测试</h1>
+        <p class="text-muted">根据中文描述，输入对应的英文 SQL 或 SQLite 点命令。不区分大小写，多余空格会被忽略，末尾分号可选。</p>
+
+        <div id="stats">
+            <span class="stat-item">📝 已答: <strong id="answeredCount">0</strong> / <strong id="totalCount">0</strong></span>
+            <span class="stat-item">✅ 正确: <strong id="correctCount">0</strong></span>
+            <span class="stat-item" id="percentDisplay">📊 正确率: 0%</span>
+            <button class="btn btn-outline-secondary btn-sm btn-reset" id="resetBtn">🔄 重置</button>
+        </div>
+
+        <div id="questionsContainer"></div>
+        <div class="footer">练习基于 SQLite 官方文档及完整操作手册 · 祝学习顺利！</div>
+    </div>
+
+    <script>
+        // ---------- 问题数据 ----------
+        const questions = [
+            // 基础 DDL / DML
+            { id: 1, desc: '创建一张名为 users 的表，包含字段：id (INTEGER PRIMARY KEY), name (TEXT), age (INTEGER)', answer: 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)' },
+            { id: 2, desc: '向 users 表中插入一条记录，name 为 "Alice", age 为 25', answer: 'INSERT INTO users (name, age) VALUES ("Alice", 25)' },
+            { id: 3, desc: '查询 users 表中的所有记录', answer: 'SELECT * FROM users' },
+            { id: 4, desc: '查询 users 表中 name 为 "Alice" 的记录', answer: 'SELECT * FROM users WHERE name = "Alice"' },
+            { id: 5, desc: '更新 users 表中 name 为 "Alice" 的记录，将 age 改为 26', answer: 'UPDATE users SET age = 26 WHERE name = "Alice"' },
+            { id: 6, desc: '删除 users 表中 name 为 "Alice" 的记录', answer: 'DELETE FROM users WHERE name = "Alice"' },
+            { id: 7, desc: '删除 users 表中的所有记录（保留表结构）', answer: 'DELETE FROM users' },
+            { id: 8, desc: '删除 users 表（表结构和数据全部删除）', answer: 'DROP TABLE users' },
+
+            // 点命令
+            { id: 9, desc: '列出当前数据库中的所有表', answer: '.tables' },
+            { id: 10, desc: '查看 users 表的创建语句（表结构）', answer: '.schema users' },
+            { id: 11, desc: '开启查询结果的列名显示（表头）', answer: '.headers ON' },
+            { id: 12, desc: '将输出模式设置为列对齐模式', answer: '.mode column' },
+            { id: 13, desc: '退出 sqlite3 命令行工具', answer: '.exit' },
+            { id: 14, desc: '查看当前已附加的数据库列表', answer: '.databases' },
+
+            // 事务
+            { id: 15, desc: '开始一个事务', answer: 'BEGIN' },
+            { id: 16, desc: '提交当前事务', answer: 'COMMIT' },
+            { id: 17, desc: '回滚当前事务', answer: 'ROLLBACK' },
+
+            // 索引
+            { id: 18, desc: '在 users 表的 name 列上创建名为 idx_name 的索引', answer: 'CREATE INDEX idx_name ON users(name)' },
+            { id: 19, desc: '删除名为 idx_name 的索引', answer: 'DROP INDEX idx_name' },
+
+            // 视图
+            { id: 20, desc: '创建名为 view_users 的视图，包含 users 表的 id 和 name 列', answer: 'CREATE VIEW view_users AS SELECT id, name FROM users' },
+            { id: 21, desc: '删除名为 view_users 的视图', answer: 'DROP VIEW view_users' },
+
+            // 外键
+            { id: 22, desc: '创建 orders 表，包含 id (INTEGER PRIMARY KEY), user_id (INTEGER)，并添加外键约束引用 users(id)', answer: 'CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER, FOREIGN KEY (user_id) REFERENCES users(id))' },
+
+            // 连接查询
+            { id: 23, desc: '使用内连接 (INNER JOIN) 查询 users 和 orders，显示 users.name 和 orders.id', answer: 'SELECT users.name, orders.id FROM users INNER JOIN orders ON users.id = orders.user_id' },
+            { id: 24, desc: '使用左连接 (LEFT JOIN) 查询 users 和 orders，显示 users.name 和 orders.id', answer: 'SELECT users.name, orders.id FROM users LEFT JOIN orders ON users.id = orders.user_id' },
+
+            // 分组与聚合
+            { id: 25, desc: '统计每个年龄 (age) 的用户人数', answer: 'SELECT age, COUNT(*) FROM users GROUP BY age' },
+            { id: 26, desc: '统计每个年龄的用户人数，并只显示人数大于 1 的年龄组', answer: 'SELECT age, COUNT(*) FROM users GROUP BY age HAVING COUNT(*) > 1' },
+            { id: 27, desc: '统计 users 表中的总记录数', answer: 'SELECT COUNT(*) FROM users' },
+            { id: 28, desc: '查询 users 表中的最大年龄', answer: 'SELECT MAX(age) FROM users' },
+            { id: 29, desc: '查询 users 表中的平均年龄', answer: 'SELECT AVG(age) FROM users' },
+
+            // 模糊查询 / 子查询
+            { id: 30, desc: '查询 users 表中 name 包含字母 "a" 的记录（模糊查询）', answer: 'SELECT * FROM users WHERE name LIKE "%a%"' },
+            { id: 31, desc: '使用子查询查询年龄大于平均年龄的用户', answer: 'SELECT * FROM users WHERE age > (SELECT AVG(age) FROM users)' },
+
+            // PRAGMA / 其他
+            { id: 32, desc: '开启外键约束检查', answer: 'PRAGMA foreign_keys = ON' },
+            { id: 33, desc: '查看 users 表的字段信息（列信息）', answer: 'PRAGMA table_info(users)' },
+            { id: 34, desc: '分析数据库表以更新统计信息（用于查询优化）', answer: 'ANALYZE' },
+
+            // ALTER TABLE
+            { id: 35, desc: '在 users 表中添加一列 phone (TEXT)', answer: 'ALTER TABLE users ADD COLUMN phone TEXT' },
+            { id: 36, desc: '将 users 表重命名为 members', answer: 'ALTER TABLE users RENAME TO members' }
+        ];
+
+        // ---------- 辅助函数 ----------
+        function normalize(str) {
+            if (typeof str !== 'string') return '';
+            return str.trim()
+                .replace(/\s+/g, ' ')          // 压缩多个空格为单个
+                .toLowerCase()
+                .replace(/;$/, '');            // 移除末尾分号
+        }
+
+        function checkAnswer(user, correct) {
+            return normalize(user) === normalize(correct);
+        }
+
+        // ---------- 渲染 ----------
+        const container = document.getElementById('questionsContainer');
+        const totalSpan = document.getElementById('totalCount');
+        const answeredSpan = document.getElementById('answeredCount');
+        const correctSpan = document.getElementById('correctCount');
+        const percentSpan = document.getElementById('percentDisplay');
+
+        let questionStates = []; // 存储每个问题的状态：是否已答、是否正确
+
+        function renderQuestions() {
+            container.innerHTML = '';
+            questionStates = questions.map(() => ({ answered: false, correct: false }));
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.dataset.index = index;
+
+                const descDiv = document.createElement('div');
+                descDiv.className = 'q-desc';
+                descDiv.innerHTML = `<span class="q-title">#${index+1}</span> ${q.desc}`;
+
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.placeholder = '输入英文命令...';
+                input.id = `input-${index}`;
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary btn-check-answer';
+                btn.textContent = '检查';
+                btn.id = `btn-${index}`;
+
+                inputGroup.appendChild(input);
+                inputGroup.appendChild(btn);
+
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-msg';
+                resultDiv.id = `result-${index}`;
+
+                card.appendChild(descDiv);
+                card.appendChild(inputGroup);
+                card.appendChild(resultDiv);
+                container.appendChild(card);
+
+                // 事件绑定
+                btn.addEventListener('click', function() {
+                    const userAnswer = input.value.trim();
+                    const isCorrect = checkAnswer(userAnswer, q.answer);
+                    const state = questionStates[index];
+                    state.answered = true;
+                    state.correct = isCorrect;
+
+                    // 更新UI
+                    card.classList.remove('correct', 'incorrect');
+                    if (isCorrect) {
+                        card.classList.add('correct');
+                        resultDiv.className = 'result-msg correct';
+                        resultDiv.textContent = '✅ 正确！';
+                    } else {
+                        card.classList.add('incorrect');
+                        resultDiv.className = 'result-msg incorrect';
+                        resultDiv.innerHTML = `❌ 错误。正确答案：<span class="answer-show">${q.answer}</span>`;
+                    }
+                    updateStats();
+                });
+
+                // 回车键触发检查
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        btn.click();
+                    }
+                });
+
+                // 如果已经答过（重置时可能保留状态），但重置会重新渲染，所以忽略
+            });
+
+            totalSpan.textContent = questions.length;
+            updateStats();
+        }
+
+        // ---------- 更新统计 ----------
+        function updateStats() {
+            const total = questions.length;
+            let answered = 0, correct = 0;
+            questionStates.forEach(s => {
+                if (s.answered) {
+                    answered++;
+                    if (s.correct) correct++;
+                }
+            });
+            answeredSpan.textContent = answered;
+            correctSpan.textContent = correct;
+            const percent = answered === 0 ? 0 : Math.round((correct / answered) * 100);
+            percentSpan.textContent = `📊 正确率: ${percent}%`;
+        }
+
+        // ---------- 重置 ----------
+        function resetAll() {
+            // 清除所有输入和状态
+            const inputs = document.querySelectorAll('.question-card input[type="text"]');
+            inputs.forEach(inp => inp.value = '');
+            const results = document.querySelectorAll('.question-card .result-msg');
+            results.forEach(r => {
+                r.textContent = '';
+                r.className = 'result-msg';
+            });
+            const cards = document.querySelectorAll('.question-card');
+            cards.forEach(c => c.className = 'question-card');
+            // 重置状态
+            questionStates.forEach(s => { s.answered = false; s.correct = false; });
+            updateStats();
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+        // ---------- 初始化 ----------
+        renderQuestions();
+    </script>
+</body>
+</html>
